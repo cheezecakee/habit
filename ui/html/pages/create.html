@@ -1,0 +1,19 @@
+{{define "title"}}"Create a New Habit"{{end}}
+
+{{define "main"}}
+<form action="/habit/create" method="POST">
+  <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+  <div>
+    <label>Title:</label>
+    {{with .Form.FieldErrors.title}}
+      <label class="error">{{.}}</label>
+    {{end}}
+    <input type="text" name="title" value="{{.Form.Title}}">
+  </div>
+  <div>
+    <input type="submit" value="Add habit">
+  </div>
+</form>
+{{end}}
+
+

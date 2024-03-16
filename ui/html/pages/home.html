@@ -1,0 +1,25 @@
+{{define "title"}}Home{{end}}
+
+{{define "main"}}
+  <h2>Habits</h2>
+  {{if .Habits}}
+    <table>
+      <tr>
+        <th>Title</th>
+        <th>Created</th>
+        <th>Streak</th>
+      </tr>
+      {{range .Habits}}
+      <tr>
+        <td>{{.Title}}</td>
+        <td>{{humanDate .Created}}</td>
+        <td>{{.Streak}}</td>
+      </tr>
+      {{end}}
+    </table>
+    {{else}}
+      <p>Welcome to Habit! A lightweight and easy to use habit tracker!</p>
+    {{end}}
+{{end}}
+
+
