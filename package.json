@@ -1,0 +1,17 @@
+{
+  "name": "habit2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "tailwind.config.js",
+  "scripts": {
+    "dev": "TAILWIND_MODE=watch postcss ./ui/static/css/main.css -o ./ui/static/css/tailwind.css --watch",
+    "build": "postcss ./ui/static/css/main.css -o ./ui/static/css/tailwind.css",
+    "watch": "postcss ./ui/static/css/main.css -o ./ui/static/css/tailwind.css --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "postcss-cli": "^11.0.0"
+  }
+}

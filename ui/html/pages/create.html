@@ -1,7 +1,7 @@
 {{define "title"}}"Create a New Habit"{{end}}
 
 {{define "main"}}
-<form action="/habit/create" method="POST">
+<form action="/habit/create" method="POST" class="flex flex-col justify-center items-center text-black">
   <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
   <div>
     <label>Title:</label>

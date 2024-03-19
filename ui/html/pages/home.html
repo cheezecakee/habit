@@ -1,25 +1,97 @@
 {{define "title"}}Home{{end}}
 
 {{define "main"}}
-  <h2>Habits</h2>
-  {{if .Habits}}
-    <table>
-      <tr>
-        <th>Title</th>
-        <th>Created</th>
-        <th>Streak</th>
-      </tr>
-      {{range .Habits}}
-      <tr>
-        <td>{{.Title}}</td>
-        <td>{{humanDate .Created}}</td>
-        <td>{{.Streak}}</td>
-      </tr>
-      {{end}}
-    </table>
+
+  {{if .IsAuthenticated}}
+    {{if .Habits}}
+      <div class="h-full flex flex-col items-center mt-4">
+        <table class="table-fixed w-3/5 border-separate text-black text-center">
+          <thead>
+            <tr>
+              <th class="border border-2 border-black">Habit</th>
+              <th class="h-6 w-6 border border-2 border-black">1</th>
+              <th class="h-6 w-6 border border-2 border-black">2</th>
+              <th class="h-6 w-6 border border-2 border-black">3</th>
+              <th class="h-6 w-6 border border-2 border-black">4</th>
+              <th class="h-6 w-6 border border-2 border-black">5</th>
+              <th class="h-6 w-6 border border-2 border-black">6</th>
+              <th class="h-6 w-6 border border-2 border-black">7</th>
+              <th class="h-6 w-6 border border-2 border-black">8</th>
+              <th class="h-6 w-6 border border-2 border-black">9</th>
+              <th class="h-6 w-6 border border-2 border-black">10</th>
+              <th class="h-6 w-6 border border-2 border-black">11</th>
+              <th class="h-6 w-6 border border-2 border-black">12</th>
+              <th class="h-6 w-6 border border-2 border-black">13</th>
+              <th class="h-6 w-6 border border-2 border-black">14</th>
+              <th class="h-6 w-6 border border-2 border-black">15</th>
+              <th class="h-6 w-6 border border-2 border-black">16</th>
+              <th class="h-6 w-6 border border-2 border-black">17</th>
+              <th class="h-6 w-6 border border-2 border-black">18</th>
+              <th class="h-6 w-6 border border-2 border-black">19</th>
+              <th class="h-6 w-6 border border-2 border-black">20</th>
+              <th class="h-6 w-6 border border-2 border-black">21</th>
+              <th class="h-6 w-6 border border-2 border-black">22</th>
+              <th class="h-6 w-6 border border-2 border-black">23</th>
+              <th class="h-6 w-6 border border-2 border-black">24</th>
+              <th class="h-6 w-6 border border-2 border-black">25</th>
+              <th class="h-6 w-6 border border-2 border-black">26</th>
+              <th class="h-6 w-6 border border-2 border-black">27</th>
+              <th class="h-6 w-6 border border-2 border-black">28</th>
+              <th class="h-6 w-6 border border-2 border-black">29</th>
+              <th class="h-6 w-6 border border-2 border-black">30</th>
+              <th class="border border-2 border-black">Streak</th>
+            </tr>
+          </thead>
+          {{range .Habits}}
+          <tbody>
+            <tr class="border">
+              <td class="border border-2 border-black">{{.Title}}</td>
+              <td class="h-6 w-6 border border-2 border-black"></td>
+              <td class="h-6 w-6 border border-2 border-black"></td>
+              <td class="h-6 w-6 border border-2 border-black"></td>
+              <td class="h-6 w-6 border border-2 border-black"></td>
+              <td class="h-6 w-6 border border-2 border-black"></td>
+              <td class="h-6 w-6 border border-2 border-black"></td>
+              <td class="h-6 w-6 border border-2 border-black"></td>
+              <td class="h-6 w-6 border border-2 border-black"></td>
+              <td class="h-6 w-6 border border-2 border-black"></td>
+              <td class="h-6 w-6 border border-2 border-black"></td>
+              <td class="h-6 w-6 border border-2 border-black"></td>
+              <td class="h-6 w-6 border border-2 border-black"></td>
+              <td class="h-6 w-6 border border-2 border-black"></td>
+              <td class="h-6 w-6 border border-2 border-black"></td>
+              <td class="h-6 w-6 border border-2 border-black"></td>
+              <td class="h-6 w-6 border border-2 border-black"></td>
+              <td class="h-6 w-6 border border-2 border-black"></td>
+              <td class="h-6 w-6 border border-2 border-black"></td>
+              <td class="h-6 w-6 border border-2 border-black"></td>
+              <td class="h-6 w-6 border border-2 border-black"></td>
+              <td class="h-6 w-6 border border-2 border-black"></td>
+              <td class="h-6 w-6 border border-2 border-black"></td>
+              <td class="h-6 w-6 border border-2 border-black"></td>
+              <td class="h-6 w-6 border border-2 border-black"></td>
+              <td class="h-6 w-6 border border-2 border-black"></td>
+              <td class="h-6 w-6 border border-2 border-black"></td>
+              <td class="h-6 w-6 border border-2 border-black"></td>
+              <td class="h-6 w-6 border border-2 border-black"></td>
+              <td class="h-6 w-6 border border-2 border-black"></td>
+              <td class="h-6 w-6 border border-2 border-black"></td>
+              <td class="border border-2 border-black">{{.Streak}}</td>
+            </tr>
+          </tbody>
+          {{end}}
+        </table>
+      </div>
     {{else}}
-      <p>Welcome to Habit! A lightweight and easy to use habit tracker!</p>
+      <div class="flex justify-center text-black">
+        <p class="text-white">No habits yet! Go to create on to get started!</p>
+      </div>
     {{end}}
+  {{else}}
+      <div class="flex justify-center text-black">
+        <p>Welcome to Habit! A lightweight and easy to use habit tracker!</p>
+      </div>
+  {{end}}
 {{end}}
 
 

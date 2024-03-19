@@ -10,17 +10,26 @@ import (
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-  habits, err := app.habits.List()
-  if err != nil {
-    app.serveError(w, err)
+  userID, ok := app.sessionManager.Get(r.Context(), "authenticatedUserID").(int)
+  data := app.newTemplateData(r)
+
+  if ok {
+  
+    habits, err := app.habits.List(userID)
+    if err != nil {
+      app.serveError(w, err)
     return
+    }
+
+    data.Habits = habits
+
+    data.IsAuthenticated = true
+  } else {
+    data.IsAuthenticated = false
   }
 
-  data := app.newTemplateData(r)
-  data.Habits = habits
-
   app.render(w, http.StatusOK, "home.html", data)
-}
+} 
 
 type habitCreateForm struct {
   Title               string `form:"title"`
@@ -55,7 +64,13 @@ func (app *application) habitCreatePost(w http.ResponseWriter, r *http.Request) 
     return
   } 
 
-  id, err := app.habits.Insert(form.Title)
+  userID, ok := app.sessionManager.Get(r.Context(), "authenticatedUserID").(int)
+  if !ok {
+    http.Error(w, "Unauthorized", http.StatusUnauthorized)
+    return
+  }
+  
+  id, err := app.habits.Insert(form.Title, userID)
   if err != nil {
     app.serveError(w, err)
     return
@@ -64,7 +79,7 @@ func (app *application) habitCreatePost(w http.ResponseWriter, r *http.Request) 
   app.sessionManager.Put(r.Context(), "flash", "Habit successfully created!")
 
   log.Printf("New habit created with ID: %d", id)
-
+  log.Printf("User id: %d", userID)
   http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
@@ -192,3 +207,7 @@ func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) {
   http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
+func (app *application) howTo(w http.ResponseWriter, r *http.Request) {
+  data := app.newTemplateData(r)
+  app.render(w, http.StatusOK, "howto.html", data)
+}
