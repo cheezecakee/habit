@@ -1,14 +1,14 @@
 {{define "title"}}"Create a New Habit"{{end}}
 
 {{define "main"}}
-<form action="/habit/create" method="POST" class="flex flex-col justify-center items-center text-black">
+<form action="/habit/create" method="POST" class="flex flex-col justify-center items-center text-white">
   <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
   <div>
     <label>Title:</label>
     {{with .Form.FieldErrors.title}}
       <label class="error">{{.}}</label>
     {{end}}
-    <input type="text" name="title" value="{{.Form.Title}}">
+    <input type="text" name="title" value="{{.Form.Title}}" class="bg-black border border-1 border-white text-white">
   </div>
   <div>
     <input type="submit" value="Add habit">

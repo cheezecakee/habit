@@ -23,11 +23,15 @@ func (app *application) routes() http.Handler {
   mux.Handle("GET /user/login", dynamic.ThenFunc(app.userLogin))
   mux.Handle("POST /user/login", dynamic.ThenFunc(app.userLoginPost))
   mux.Handle("GET /howTo", dynamic.ThenFunc(app.howTo))
+  mux.Handle("POST /habit/log/{id}/{day}", dynamic.ThenFunc(app.habitLogPost))
+  // mux.Handle("POST /habit/log/{id}/{day}", dynamic.ThenFunc(func(w http.ResponseWriter, r *http.Request) {
+    // fmt.Fprintf(w, "Received POST request")}))
 
   protected := dynamic.Append(app.requireAuthentication)
 
   mux.Handle("GET /habit/create", protected.ThenFunc(app.habitCreate))
   mux.Handle("POST /habit/create", protected.ThenFunc(app.habitCreatePost))
+
   mux.Handle("POST /user/logout", protected.ThenFunc(app.userLogoutPost))
 
   standard := alice.New(app.recoverPanic, app.logRequest, secureHeaders)
