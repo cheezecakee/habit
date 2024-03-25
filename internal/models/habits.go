@@ -1,13 +1,16 @@
 package models
+
 import (
-  "database/sql"
-  "errors"
+	"database/sql"
+	"errors"
+	"time"
 )
 
 type Habit struct {
   ID      int
   Title   string
-  Streak  int
+  Created time.Time
+  UserID  int
 }
 
 type HabitModel struct {
@@ -15,14 +18,14 @@ type HabitModel struct {
 }
 
 func (m *HabitModel) Insert(title string, userID int) (int, error) {
-  stmt := `INSERT INTO habits (title, created, streak, user_id) VALUES(?, UTC_TIMESTAMP(), ?, ?)`
+  stmt := `INSERT INTO habits (title, created, user_id) VALUES(?, UTC_TIMESTAMP(),  ?)`
 
   // Use the Exec() method on the embedded connection pool to execute the statement.
   // The first parameter is the SQL statement, followed by the
   // title, content and expiry values for the placeholder parameters. 
   // This method returns a sql.Result type, which contains some basic
   // information about what happened when the statement was executed.
-  result, err := m.DB.Exec(stmt, title, 0, userID)
+  result, err := m.DB.Exec(stmt, title, userID)
   if err != nil {
     return 0, err
   }
@@ -39,14 +42,14 @@ func (m *HabitModel) Insert(title string, userID int) (int, error) {
   return int(id), nil
 }
 
-func (m *HabitModel) Get(id int) (*Habit, error) {
-  stmt := `SELECT id, title, streak FROM habits WHERE id =?`
+func (m *HabitModel) Get(id, userID int) (*Habit, error) {
+  stmt := `SELECT * FROM habits WHERE id = ? AND user_id = ?`
 
-  row := m.DB.QueryRow(stmt, id)
+  row := m.DB.QueryRow(stmt, id, userID)
 
   h := &Habit{}
 
-  err := row.Scan(&h.ID, &h.Title, &h.Streak)
+  err := row.Scan(&h.Title, &h.Created, &h.ID,  &h.UserID)
   if err != nil {
     if errors.Is(err, sql.ErrNoRows) {
       return nil, ErrNoRecord
@@ -59,7 +62,7 @@ func (m *HabitModel) Get(id int) (*Habit, error) {
 }
 
 func (m *HabitModel) List(userID int) ([]*Habit, error) {
-  stmt := `SELECT id, title, streak FROM habits WHERE user_id = ? ORDER BY title ASC`
+  stmt := `SELECT id, title FROM habits WHERE user_id = ? ORDER BY title ASC`
 
   rows, err := m.DB.Query(stmt, userID)
   if err != nil {
@@ -73,7 +76,7 @@ func (m *HabitModel) List(userID int) ([]*Habit, error) {
   for rows.Next() {
     h := &Habit{}
 
-    err = rows.Scan(&h.ID, &h.Title, &h.Streak)
+    err = rows.Scan(&h.ID, &h.Title)
     if err != nil {
       return nil, err
     }
@@ -87,4 +90,4 @@ func (m *HabitModel) List(userID int) ([]*Habit, error) {
 
   return habits, nil
 }
-
+ 

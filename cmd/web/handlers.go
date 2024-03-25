@@ -2,8 +2,11 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
+	"strconv"
+	"time"
 
 	"habits.cheezecake.net/internal/models"
 	"habits.cheezecake.net/internal/validator"
@@ -18,10 +21,17 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
     habits, err := app.habits.List(userID)
     if err != nil {
       app.serveError(w, err)
-    return
+      return
     }
 
     data.Habits = habits
+
+    habitLogs, err := app.habitsLog.List(userID)
+    if err != nil {
+      app.serveError(w, err)
+      return
+    }
+    data.HabitsLogs = habitLogs
 
     data.IsAuthenticated = true
   } else {
@@ -190,7 +200,7 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 
   app.sessionManager.Put(r.Context(), "authenticatedUserID", id)
 
-  http.Redirect(w, r, "/habit/create", http.StatusSeeOther)
+  http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) {
@@ -210,4 +220,91 @@ func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) {
 func (app *application) howTo(w http.ResponseWriter, r *http.Request) {
   data := app.newTemplateData(r)
   app.render(w, http.StatusOK, "howto.html", data)
+}
+
+func (app *application) habitLogPost(w http.ResponseWriter, r *http.Request) {
+  data := app.newTemplateData(r)
+
+  // Get current userID
+  userID, ok := app.sessionManager.Get(r.Context(), "authenticatedUserID").(int)
+  if !ok {
+    http.Error(w, "Unauthorized", http.StatusUnauthorized)
+    return
+  }
+
+  // Parse the id and day parameters from the URL Path
+  idStr := r.PathValue("id")
+  dayStr := r.PathValue("day")
+
+  // Validate parsed parameters
+  id, err := strconv.Atoi(idStr)
+  if err != nil || id < 1 {
+    app.notFound(w)
+    return
+  }
+  
+  day, err := strconv.Atoi(dayStr)
+  if err != nil || day < 1 {
+    app.notFound(w)
+    return
+  }
+
+  currentDate := time.Now()
+  habitDate := time.Date(currentDate.Year(), currentDate.Month(), day, 0, 0, 0, 0, time.UTC)
+
+  var htmlResponse string
+
+  // Check if a habit log already exits for the given habit and date 
+  hasLog, err := app.habitsLog.HasLog(id, userID, habitDate)
+  if err != nil {
+    app.serveError(w, err)
+    return
+  }
+
+  if hasLog {
+    log.Println("Log already exists")
+    // Check if habit log is set to true or false
+    status, err := app.habitsLog.Status(id, userID, habitDate)
+    if err != nil {
+      app.serveError(w, err)
+      return
+    }
+    
+    if status {
+      // Update the habit log
+      err = app.habitsLog.Update(id, userID, habitDate, false)
+      if err != nil {
+        app.serveError(w, err)
+      }
+
+      log.Println("Log Status Updated to False")
+
+      htmlResponse = fmt.Sprintf(`<td class="h-6 w-6 border border-2 border-black rounded-md" hx-post="/habit/log/%d/%d" hx-headers='{"X-CSRF-Token": "%s"}' hx-swap="outerHTML" hx-target="this"></td>`, id, day, data.CSRFToken)
+    } else {
+      err = app.habitsLog.Update(id, userID, habitDate, true)
+      if err != nil {
+        app.serveError(w, err)
+      }
+      
+      log.Println("Log Status Updated to True")
+
+      htmlResponse = fmt.Sprintf(`<td class="h-6 w-6 border border-2 border-black bg-green-500 rounded-md" hx-post="/habit/log/%d/%d" hx-headers='{"X-CSRF-Token": "%s"}' hx-swap="outerHTML" hx-target="this"></td>`, id, day, data.CSRFToken)
+    } 
+  } else {
+    err = app.habitsLog.Insert(id, userID, habitDate, true)
+    if err != nil {
+      app.serveError(w, err)
+      return
+    }
+
+    log.Println("New Log Created")
+
+    htmlResponse = fmt.Sprintf(`<td class="h-6 w-6 border border-2 border-black bg-green-500 rounded-md" hx-post="/habit/log/%d/%d" hx-headers='{"X-CSRF-Token": "%s"}' hx-swap="outerHTML" hx-target="this"></td>`, id, day, data.CSRFToken)
+  }
+
+  // jsonResponse := []byte(`{"status": "success"}`)
+  // Set the Content-Type header to application/json
+  w.Header().Set("Content-Type", "text/html")
+  // Write the JSON response
+  w.Write([]byte(htmlResponse))
 }

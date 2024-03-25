@@ -21,6 +21,7 @@ type application struct {
   errorLog       *log.Logger
   infoLog        *log.Logger
   habits         *models.HabitModel
+  habitsLog      *models.HabitLogModel
   users          *models.UserModel
   templateCache  map[string]*template.Template
   formDecoder    *form.Decoder
@@ -60,6 +61,7 @@ func main() {
     errorLog:       errorLog,
     infoLog:        infoLog,
     habits:         &models.HabitModel{DB: db},
+    habitsLog:      &models.HabitLogModel{DB: db},
     users:          &models.UserModel{DB: db},
     templateCache:  templateCache, 
     formDecoder:    formDecoder,
