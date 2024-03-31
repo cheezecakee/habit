@@ -4,25 +4,27 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>{{template "title" .}} - Habit</title>
     
     <link rel="stylesheet" href="/static/css/main.css">
     <link rel="stylesheet" href="/static/css/tailwind.css">
-    
+
+    <link rel='shortcut icon' href='/static/img/habit.ico' type='image/x-icon'>
+
+    <script src="https://unpkg.com/htmx.org@1.9.11"></script>
   </head>
-  <body class="h-dvh bg-white flex flex-col">
-    <header class="flex justify-evenly items-center p-4 mt-6 text-sky-400">
+  <body class="h-dvh bg-black flex flex-col">
+    <header class="flex justify-evenly items-center p-4 mt-6 text-white">
       <h1><a href="/">Habit</a></h1>
     </header>
     {{template "nav" .}}
     <main class="h-full flex flex-col justify-center justify-items-center">
       {{with .Flash}}
-        <div class="flash text-black text-center">{{.}}</div>
+        <div class="flash text-white text-center">{{.}}</div>
       {{end}}
       {{template "main" .}}
     </main>
-    <footer class="flex justify-center items-center p-4 m-8 text-center text-black tracking-wide">
+    <footer class="flex justify-center items-center p-4 m-8 text-center text-white tracking-wide">
       <div>
         Porwered by <a href="https://goland.org">Go</a> in {{.CurrentYear}}
       </div>

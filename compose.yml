@@ -1,0 +1,28 @@
+services:
+  mysql:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'habittracker'
+      MYSQL_USER: 'web'
+      MYSQL_PASSWORD: 'bacon' 
+      MYSQL_ROOT_PASSWORD: 'bacon' 
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql_volume:/var/lib/mysql
+      - ./internal/models/migrations:/docker-entrypoint-initdb.d
+
+  webapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+    environment:
+      ADDR: ":8080"
+      DSN: "web:bacon@tcp(mysql:3306)/habittracker?parseTime=true"
+volumes:
+  mysql_volume:

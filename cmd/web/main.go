@@ -3,13 +3,11 @@ package main
 import (
 	"crypto/tls"
 	"database/sql"
-	"flag"
 	"html/template"
 	"log"
 	"net/http"
 	"os"
 	"time"
-
 	"github.com/alexedwards/scs/mysqlstore"
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-playground/form/v4"
@@ -21,6 +19,7 @@ type application struct {
   errorLog       *log.Logger
   infoLog        *log.Logger
   habits         *models.HabitModel
+  habitsLog      *models.HabitLogModel
   users          *models.UserModel
   templateCache  map[string]*template.Template
   formDecoder    *form.Decoder
@@ -28,29 +27,33 @@ type application struct {
 }
 
 func main() {
-  addr := flag.String("addr", ":4000", "HTTP network address")
-  dsn := flag.String("dns", "web:bacon@/habittracker?parseTime=true", "MySQL data source name")
+  addr := os.Getenv("ADDR")
+  if addr == "" {
+     addr = ":8080"
+  }
 
-  flag.Parse()
+  dsn := os.Getenv("DSN")
+  if dsn == "" {
+     // Assuming your MySQL service is named "mysql" in docker-compose.yml
+     // dsn = "web:bacon@/habittracker?parseTime=true"
+     dsn = "web:bacon@tcp(mysql:3306)/habittracker?parseTime=true"
+  }
+
 
   infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
   errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
-
   // DB connection pool
-  db, err := openDB(*dsn)
+  db, err := openDB(dsn)
   if err != nil {
     errorLog.Fatal(err)
   }
-
   defer db.Close()
-
   templateCache, err := newTemplateCache()
   if err != nil {
     errorLog.Fatal(err)
   }
 
   formDecoder := form.NewDecoder()
-
   sessionManager := scs.New()
   sessionManager.Store = mysqlstore.New(db)
   sessionManager.Lifetime = 12 * time.Hour
@@ -60,6 +63,7 @@ func main() {
     errorLog:       errorLog,
     infoLog:        infoLog,
     habits:         &models.HabitModel{DB: db},
+    habitsLog:      &models.HabitLogModel{DB: db},
     users:          &models.UserModel{DB: db},
     templateCache:  templateCache, 
     formDecoder:    formDecoder,
@@ -69,9 +73,8 @@ func main() {
   tlsConfig := &tls.Config{
     CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
   }
-
   srv := &http.Server{
-    Addr:         *addr,
+    Addr:         addr,
     ErrorLog:     errorLog,
     Handler:      app.routes(),
     TLSConfig:    tlsConfig,
@@ -80,7 +83,7 @@ func main() {
     WriteTimeout: 10 * time.Second,
   }
 
-  infoLog.Printf("Starting server on %s", *addr)
+  infoLog.Printf("Starting server on %s", addr)
   err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
   errorLog.Fatal(err)
 }
